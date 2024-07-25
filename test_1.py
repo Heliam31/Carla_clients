@@ -14,10 +14,10 @@ Welcome to CARLA manual control.
 
 Use ARROWS or WASD keys for control.
 
-    W            : throttle
+    Z            : throttle
     S            : brake
-    A/D          : steer left/right
-    Q            : toggle reverse
+    Q/D          : steer left/right
+    A            : toggle reverse
     Space        : hand-brake
     P            : toggle autopilot
     M            : toggle manual transmission
@@ -26,7 +26,7 @@ Use ARROWS or WASD keys for control.
 
     L            : toggle next light type
     SHIFT + L    : toggle high beam
-    Z/X          : toggle right/left blinker
+    W/X          : toggle right/left blinker
     I            : toggle interior light
 
     TAB          : change sensor position
@@ -94,6 +94,9 @@ import random
 import re
 import weakref
 import time
+import ctypes
+
+
 try:
     import pygame
     from pygame.locals import KMOD_CTRL
@@ -149,6 +152,7 @@ except ImportError:
 # -- Global functions ----------------------------------------------------------
 # ==============================================================================
 
+user32 = ctypes.windll.user32
 
 def find_weather_presets():
     rgx = re.compile('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)')
@@ -1329,14 +1333,16 @@ def game_loop(args):
         if args.autopilot and not sim_world.get_settings().synchronous_mode:
             print("WARNING: You are currently in asynchronous mode and could "
                   "experience some issues with the traffic simulation")
-
+            
+        screen_width = user32.GetSystemMetrics(0)
+        screen_height = user32.GetSystemMetrics(1)
         display = pygame.display.set_mode(
-            (args.width, args.height),
+            (screen_width, screen_height),
             pygame.HWSURFACE | pygame.DOUBLEBUF)
         display.fill((0,0,0))
         pygame.display.flip()
 
-        hud = HUD(args.width, args.height)
+        hud = HUD(screen_width, screen_height)
         world = World(sim_world, hud, args)
         controller = KeyboardControl(world, args.autopilot)
 
